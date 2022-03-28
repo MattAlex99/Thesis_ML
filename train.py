@@ -8,7 +8,7 @@ from voc import parse_voc_annotation
 from yolo import create_yolov3_model, dummy_loss
 from generator import BatchGenerator
 from utils.utils import normalize, evaluate, makedirs
-from keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau, CSVLogger
 from keras.optimizers import Adam
 from callbacks import CustomModelCheckpoint, CustomTensorBoard
 from utils.multi_gpu_model import multi_gpu_model
@@ -254,7 +254,8 @@ def _main_(args):
     ###############################
     #   Kick off the training
     ###############################
-    callbacks = create_callbacks(config['train']['saved_weights_name'], config['train']['tensorboard_dir'], infer_model)
+    csv_logger = CSVLogger('log.csv', append=True, separator=';')
+    callbacks = create_callbacks(config['train']['saved_weights_name'], config['train']['tensorboard_dir'], infer_model,csv_logger)
 
     train_model.fit_generator(
         generator        = train_generator, 
