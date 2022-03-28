@@ -1,4 +1,6 @@
 import argparse
+import sys
+sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 import os
 import numpy as np
 from keras.layers import Conv2D, Input, BatchNormalization, LeakyReLU, ZeroPadding2D, UpSampling2D
@@ -7,7 +9,7 @@ from keras.models import Model
 import struct
 import cv2
 
-np.set_printoptions(threshold=np.nan)
+#np.set_printoptions(threshold=np.nan)
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
@@ -261,18 +263,18 @@ def preprocess_input(image, net_h, net_w):
 
     # determine the new size of the image
     if (float(net_w)/new_w) < (float(net_h)/new_h):
-        new_h = (new_h * net_w)/new_w
+        new_h = (new_h * net_w)/new_w -1
         new_w = net_w
     else:
         new_w = (new_w * net_h)/new_h
-        new_h = net_h
-
+        new_h = net_h 
+    print ("in case of error change new_h and new_w")
     # resize the image to the new size
     resized = cv2.resize(image[:,:,::-1]/255., (int(new_w), int(new_h)))
-
+    print(np.expand_dims(resized, axis=0).shape)
     # embed the image into the standard letter box
     new_image = np.ones((net_h, net_w, 3)) * 0.5
-    new_image[int((net_h-new_h)//2):int((net_h+new_h)//2), int((net_w-new_w)//2):int((net_w+new_w)//2), :] = resized
+    new_image[int((net_h-new_h)//2):int((net_h+new_h)//2), int((net_w-new_w)//2):int((net_w+new_w)//2), :] = np.expand_dims(resized, axis=0)
     new_image = np.expand_dims(new_image, 0)
 
     return new_image

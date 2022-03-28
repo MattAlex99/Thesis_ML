@@ -5,13 +5,13 @@ import pickle
 
 def parse_voc_annotation(ann_dir, img_dir, cache_name, labels=[]):
     if os.path.exists(cache_name):
+        print(cache_name)
         with open(cache_name, 'rb') as handle:
             cache = pickle.load(handle)
         all_insts, seen_labels = cache['all_insts'], cache['seen_labels']
     else:
         all_insts = []
         seen_labels = {}
-        
         for ann in sorted(os.listdir(ann_dir)):
             img = {'object':[]}
 
@@ -23,6 +23,7 @@ def parse_voc_annotation(ann_dir, img_dir, cache_name, labels=[]):
                 continue
             
             for elem in tree.iter():
+
                 if 'filename' in elem.tag:
                     img['filename'] = img_dir + elem.text
                 if 'width' in elem.tag:

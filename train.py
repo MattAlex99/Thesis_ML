@@ -121,7 +121,7 @@ def create_model(
     obj_scale,
     noobj_scale,
     xywh_scale,
-    class_scale  
+    class_scale
 ):
     if multi_gpu > 1:
         with tf.device('/cpu:0'):
@@ -262,7 +262,7 @@ def _main_(args):
         epochs           = config['train']['nb_epochs'] + config['train']['warmup_epochs'], 
         verbose          = 2 if config['train']['debug'] else 1,
         callbacks        = callbacks, 
-        workers          = 4,
+        workers          = 8,
         max_queue_size   = 8
     )
 
