@@ -1,7 +1,7 @@
 # YOLO3 (Detection, Training, and Evaluation)
 
 ## Dataset and Model
-
+Project coppied from https://github.com/experiencor/keras-yolo3 for ease of use
 Dataset | mAP | Demo | Config | Model
 :---:|:---:|:---:|:---:|:---:
 Kangaroo Detection (1 class) (https://github.com/experiencor/kangaroo) | 95% | https://youtu.be/URO3UDHvoLY | check zoo | https://bit.ly/39rLNoE
