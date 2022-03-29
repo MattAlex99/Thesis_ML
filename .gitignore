@@ -2,6 +2,7 @@
 *.jpeg
 *.weights
 *.h5
+backend.h5
 *.pyc
 *.xml
 *.mp4
