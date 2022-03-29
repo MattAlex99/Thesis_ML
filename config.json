@@ -31,7 +31,7 @@
     },
 
     "valid": {
-        "valid_image_folder":   "./test/raccoon_dataset/images/valid_image_folder/",
+        "valid_image_folder":   "./test/raccoon_dataset/images/val_image_folder/",
         "valid_annot_folder":   "./test/raccoon_dataset/annotations/valid_annot_folder/",
         "cache_name":           "raccoon_val.pkl",
 

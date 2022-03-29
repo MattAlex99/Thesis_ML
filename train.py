@@ -71,7 +71,7 @@ def create_training_instances(
 
     return train_ints, valid_ints, sorted(labels), max_box_per_image
 
-def create_callbacks(saved_weights_name, tensorboard_logs, model_to_save):
+def create_callbacks(saved_weights_name, tensorboard_logs, model_to_save,csv_logger):
     makedirs(tensorboard_logs)
     
     early_stop = EarlyStopping(
@@ -105,7 +105,7 @@ def create_callbacks(saved_weights_name, tensorboard_logs, model_to_save):
         write_graph            = True,
         write_images           = True,
     )    
-    return [early_stop, checkpoint, reduce_on_plateau, tensorboard]
+    return [early_stop, checkpoint, reduce_on_plateau, tensorboard,csv_logger]
 
 def create_model(
     nb_class, 
