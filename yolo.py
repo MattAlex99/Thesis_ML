@@ -3,12 +3,12 @@ from keras.layers.merge import add, concatenate
 from keras.models import Model
 from keras.engine.topology import Layer
 import tensorflow as tf
-
-debug = False
+import math
+debug =False 
 
 class YoloLayer(Layer):
     def __init__(self, anchors, max_grid, batch_size, warmup_batches, ignore_thresh, 
-                    grid_scale, obj_scale, noobj_scale, xywh_scale, class_scale, 
+                    grid_scale, obj_scale, noobj_scale, xywh_scale, class_scale,output_layer=2,
                     **kwargs):
         # make the model settings persistent
         self.ignore_thresh  = ignore_thresh
@@ -16,10 +16,10 @@ class YoloLayer(Layer):
         self.anchors        = tf.constant(anchors, dtype='float', shape=[1,1,1,3,2])
         self.grid_scale     = grid_scale
         self.obj_scale      = obj_scale
-        self.noobj_scale    = noobj_scale
-        self.xywh_scale     = xywh_scale
+        self.noobj_scale    = noobj_scale 
+        self.xywh_scale     = xywh_scale #Wie schlim ist abweichen des Mittelpunktes von erkannten Boxen
         self.class_scale    = class_scale        
-
+        self.output_layer   = output_layer
         # make a persistent mesh grid
         max_grid_h, max_grid_w = max_grid
 
@@ -31,8 +31,13 @@ class YoloLayer(Layer):
 
     def build(self, input_shape):
         super(YoloLayer, self).build(input_shape)  # Be sure to call this somewhere!
-
-    def call(self, x):
+    def call(self,x):
+        res=self.call2(x)
+        if self.output_layer==1:
+            #res=(res+1)*(res+1)-1
+            res=res*2
+        return res
+    def call2(self, x):
         input_image, y_pred, y_true, true_boxes = x
 
         # adjust the shape of the y_predict [batch, grid_h, grid_w, 3, 4+1+nb_class]
@@ -134,15 +139,15 @@ class YoloLayer(Layer):
         iou_scores  = tf.truediv(intersect_areas, union_areas)
         iou_scores  = object_mask * tf.expand_dims(iou_scores, 4)
         
-        count       = tf.reduce_sum(object_mask)
-        count_noobj = tf.reduce_sum(1 - object_mask)
-        detect_mask = tf.to_float((pred_box_conf*object_mask) >= 0.5)
-        class_mask  = tf.expand_dims(tf.to_float(tf.equal(tf.argmax(pred_box_class, -1), true_box_class)), 4)
+        count       = tf.reduce_sum(object_mask) #anzahl der Felder, in denen das Zentrum eines Objektes ist
+        count_noobj = tf.reduce_sum(1 - object_mask) #anzahl der Felder, in denen kein Objekt ist
+        detect_mask = tf.to_float((pred_box_conf*object_mask) >= 0.5) #Maske,die fuer alle Werte 
+        class_mask  = tf.expand_dims(tf.to_float(tf.equal(tf.argmax(pred_box_class, -1), true_box_class)), 4) #Maske die nur die Wahrscheinlichkeiten erkannter Objekte (ueber 50%) beinhaltet
         recall50    = tf.reduce_sum(tf.to_float(iou_scores >= 0.5 ) * detect_mask  * class_mask) / (count + 1e-3)
         recall75    = tf.reduce_sum(tf.to_float(iou_scores >= 0.75) * detect_mask  * class_mask) / (count + 1e-3)    
         avg_iou     = tf.reduce_sum(iou_scores) / (count + 1e-3)
-        avg_obj     = tf.reduce_sum(pred_box_conf  * object_mask)  / (count + 1e-3)
-        avg_noobj   = tf.reduce_sum(pred_box_conf  * (1-object_mask))  / (count_noobj + 1e-3)
+        avg_obj     = tf.reduce_sum(pred_box_conf  * object_mask)  / (count + 1e-3) #wo Objekt erkannt wurde ist auch wirklich eins
+        avg_noobj   = tf.reduce_sum(pred_box_conf  * (1-object_mask))  / (count_noobj + 1e-3) #dort wo kein Objekt erkannt wude auch wirklic keins ist
         avg_cat     = tf.reduce_sum(object_mask * class_mask) / (count + 1e-3) 
 
         """
@@ -179,6 +184,7 @@ class YoloLayer(Layer):
         loss = loss_xy + loss_wh + loss_conf + loss_class
 
         if debug:
+            #tf.Print("object_mask",object_mask)
             loss = tf.Print(loss, [grid_h, avg_obj], message='avg_obj \t\t', summarize=1000)
             loss = tf.Print(loss, [grid_h, avg_noobj], message='avg_noobj \t\t', summarize=1000)
             loss = tf.Print(loss, [grid_h, avg_iou], message='avg_iou \t\t', summarize=1000)
@@ -306,7 +312,9 @@ def create_yolov3_model(
                             obj_scale,
                             noobj_scale,
                             xywh_scale,
-                            class_scale)([input_image, pred_yolo_1, true_yolo_1, true_boxes])
+                            class_scale,
+                            output_layer=1)([input_image, pred_yolo_1, true_yolo_1, true_boxes])
+
 
     # Layer 83 => 86
     x = _conv_block(x, [{'filter': 256, 'kernel': 1, 'stride': 1, 'bnorm': True, 'leaky': True, 'layer_idx': 84}], do_skip=False)

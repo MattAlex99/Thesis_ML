@@ -322,6 +322,19 @@ def decode_netout(netout, anchors, obj_thresh, nms_thresh, net_h, net_w):
     return boxes
 
 def correct_yolo_boxes(boxes, image_h, image_w, net_h, net_w):
+    for box in boxes:
+        print("New Box")
+        print(type(boxes[0]))
+        print(box.xmin)
+        print(box.xmax)
+        print(box.ymin)
+        print(box.ymax)
+        print(box.get_label())
+        print(box.get_score())
+        print(box.classes)
+        print(box.objness)
+        print("      ")
+    print(image_h, image_w, net_h, net_w)
     if (float(net_w)/image_w) < (float(net_h)/image_h):
         new_w = net_w
         new_h = (image_h*net_w)/image_w
@@ -397,7 +410,7 @@ def _main_(args):
               "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", \
               "chair", "sofa", "pottedplant", "bed", "diningtable", "toilet", "tvmonitor", "laptop", "mouse", \
               "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", \
-              "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]
+              "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush","OTM"]
 
     # make the yolov3 model to predict 80 classes on COCO
     yolov3 = make_yolov3_model()

@@ -16,6 +16,14 @@ class BoundBox:
         self.label = -1
         self.score = -1
 
+    def print_box(self):
+        print("Printing_box")
+        print("x_min,y_min,x_max,y_max",self.xmin,self.ymin,self.xmax,self.ymax)
+        print("label:",self.get_label())
+        print("score:",self.get_score())
+        print("c:",self.c)
+        print("classes:",self.classes)
+
     def get_label(self):
         if self.label == -1:
             self.label = np.argmax(self.classes)
@@ -52,35 +60,45 @@ def bbox_iou(box1, box2):
     w1, h1 = box1.xmax-box1.xmin, box1.ymax-box1.ymin
     w2, h2 = box2.xmax-box2.xmin, box2.ymax-box2.ymin
     
+    if w1==w2:
+       w1+=0.000001
+       w2+=0.0002
+    if h1==h2:
+       h1+=0.000001
+       h2+=0.0002
     union = w1*h1 + w2*h2 - intersect
-    
-    return float(intersect) / union
-
+    if  union==0:
+        return 0
+    #print("iou, (i,u,i/u):",float(intersect),union,float(intersect) /union)
+    return float(intersect) /union
 def draw_boxes(image, boxes, labels, obj_thresh, quiet=True):
+    print(boxes)
     for box in boxes:
+
+
         label_str = ''
         label = -1
-        
         for i in range(len(labels)):
             if box.classes[i] > obj_thresh:
                 if label_str != '': label_str += ', '
                 label_str += (labels[i] + ' ' + str(round(box.get_score()*100, 2)) + '%')
                 label = i
             if not quiet: print(label_str)
-                
+
         if label >= 0:
-            text_size = cv2.getTextSize(label_str, cv2.FONT_HERSHEY_SIMPLEX, 1.1e-3 * image.shape[0], 5)
+            text_size = cv2.getTextSize(label_str, cv2.FONT_HERSHEY_SIMPLEX, 1.1e-5 * image.shape[0], 3)
             width, height = text_size[0][0], text_size[0][1]
-            region = np.array([[box.xmin-3,        box.ymin], 
-                               [box.xmin-3,        box.ymin-height-26], 
+            region = np.array([[box.xmin,        box.ymin], 
+                               [box.xmin,        box.ymin-height-26], 
                                [box.xmin+width+13, box.ymin-height-26], 
                                [box.xmin+width+13, box.ymin]], dtype='int32')  
-
-            cv2.rectangle(img=image, pt1=(box.xmin,box.ymin), pt2=(box.xmax,box.ymax), color=get_color(label), thickness=5)
-            cv2.fillPoly(img=image, pts=[region], color=get_color(label))
+            #print(box.xmin,box.ymin,box.xmax,box.ymax,label_str)
+            box.print_box()
+            cv2.rectangle(img=image, pt1=(box.xmin,box.ymin), pt2=(box.xmax,box.ymax), color=get_color(label), thickness=2)
+            #cv2.fillPoly(img=image, pts=[region], color=get_color(label))
             cv2.putText(img=image, 
                         text=label_str, 
-                        org=(box.xmin+13, box.ymin - 13), 
+                        org=(box.xmin, box.ymin - 8), 
                         fontFace=cv2.FONT_HERSHEY_SIMPLEX, 
                         fontScale=1e-3 * image.shape[0], 
                         color=(0,0,0), 

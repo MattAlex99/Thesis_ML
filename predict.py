@@ -1,12 +1,13 @@
 #! /usr/bin/env python
-
+import sys
+sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 import os
 import argparse
 import json
 import cv2
 from utils.utils import get_yolo_boxes, makedirs
 from utils.bbox import draw_boxes
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 from tqdm import tqdm
 import numpy as np
 
@@ -14,7 +15,7 @@ def _main_(args):
     config_path  = args.conf
     input_path   = args.input
     output_path  = args.output
-
+    print(input_path)
     with open(config_path) as config_buffer:    
         config = json.load(config_buffer)
 
@@ -111,15 +112,20 @@ def _main_(args):
         # the main loop
         for image_path in image_paths:
             image = cv2.imread(image_path)
+            #print(image)
+            #cv2.rectangle(image, (407,278), (450,358),(255, 0, 0), thickness=5)
+            #cv2.imwrite("result.jpg", np.uint8(image))   
+            #cv2.imshow("window_name", np.uint8(image)) 
             print(image_path)
-
+      
             # predict the bounding boxes
             boxes = get_yolo_boxes(infer_model, [image], net_h, net_w, config['model']['anchors'], obj_thresh, nms_thresh)[0]
-
+	    
             # draw bounding boxes on the image using labels
             draw_boxes(image, boxes, config['model']['labels'], obj_thresh) 
      
             # write the image with bounding boxes to file
+            print(output_path)
             cv2.imwrite(output_path + image_path.split('/')[-1], np.uint8(image))         
 
 if __name__ == '__main__':

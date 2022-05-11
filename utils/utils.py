@@ -2,7 +2,9 @@ import cv2
 import numpy as np
 import os
 from .bbox import BoundBox, bbox_iou
+from .bbox import draw_boxes
 from scipy.special import expit
+#from scipy.special import expit
 
 def _sigmoid(x):
     return expit(x)
@@ -43,10 +45,15 @@ def evaluate(model,
 
     for i in range(generator.size()):
         raw_image = [generator.load_image(i)]
-
         # make the boxes and the labels
         pred_boxes = get_yolo_boxes(model, raw_image, net_h, net_w, generator.get_anchors(), obj_thresh, nms_thresh)[0]
+        print(pred_boxes)
 
+        if not save_path is None:
+            #print(raw_image)
+            saveable_image=draw_boxes(raw_image[0], pred_boxes, ['OTM'], obj_thresh)
+            print(save_path+"/eval_"+str(i)+".jpg")
+            cv2.imwrite(save_path+"/eval_"+str(i)+".jpg", np.uint8(saveable_image))  
         score = np.array([box.get_score() for box in pred_boxes])
         pred_labels = np.array([box.label for box in pred_boxes])        
         
@@ -130,6 +137,7 @@ def evaluate(model,
     return average_precisions    
 
 def correct_yolo_boxes(boxes, image_h, image_w, net_h, net_w):
+
     if (float(net_w)/image_w) < (float(net_h)/image_h):
         new_w = net_w
         new_h = (image_h*net_w)/image_w
@@ -246,13 +254,15 @@ def get_yolo_boxes(model, images, net_h, net_w, anchors, obj_thresh, nms_thresh)
     for i in range(nb_images):
         yolos = [batch_output[0][i], batch_output[1][i], batch_output[2][i]]
         boxes = []
-
         # decode the output of the network
         for j in range(len(yolos)):
             yolo_anchors = anchors[(2-j)*6:(3-j)*6] # config['model']['anchors']
             boxes += decode_netout(yolos[j], yolo_anchors, obj_thresh, net_h, net_w)
 
         # correct the sizes of the bounding boxes
+        for box in boxes:
+        	print(box.print_box())
+        #print(boxes, image_h, image_w, net_h, net_w)
         correct_yolo_boxes(boxes, image_h, image_w, net_h, net_w)
 
         # suppress non-maximal boxes

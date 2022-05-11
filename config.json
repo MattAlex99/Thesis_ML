@@ -2,39 +2,39 @@
     "model" : {
         "min_input_size":       288,
         "max_input_size":       448,
-        "anchors":              [55,69, 75,234, 133,240, 136,129, 142,363, 203,290, 228,184, 285,359, 341,260],
-        "labels":               ["raccoon"]
+        "anchors":              [9,27, 17,42, 23,56, 30,68, 36,88, 43,106, 55,133, 67,162, 83,169],
+        "labels":               ["OTM"]
     },
 
     "train": {
-        "train_image_folder":   "./test/raccoon_dataset/images/train_image_folder/",
-        "train_annot_folder":   "./test/raccoon_dataset/annotations/train_annot_folder/",
-        "cache_name":           "raccoon_test.pkl",
+        "train_image_folder":   "./Thesis_Datasets/images/train_images_folder/",
+        "train_annot_folder":   "./Thesis_Datasets/annotations/train_annot_folder/",
+        "cache_name":           "OTM_V7.pkl",
 
-        "train_times":          4,
-        "batch_size":           18,
-        "learning_rate":        1e-4,
+        "train_times":          1,
+        "batch_size":           1,
+        "learning_rate":        1e-6,
         "nb_epochs":            100,
         "warmup_epochs":        3,
         "ignore_thresh":        0.5,
-        "gpus":                 "",
+        "gpus":                 "2",
 
         "grid_scales":          [1,1,1],
-        "obj_scale":            5,
+        "obj_scale":            4,
         "noobj_scale":          1,
-        "xywh_scale":           1,
+        "xywh_scale":           2,
         "class_scale":          1,
 
         "tensorboard_dir":      "logs",
-        "saved_weights_name":   "raccoon.h5",
+        "saved_weights_name":   "OTM_V7.h5",
         "debug":                true
     },
 
     "valid": {
-        "valid_image_folder":   "./test/raccoon_dataset/images/val_image_folder/",
-        "valid_annot_folder":   "./test/raccoon_dataset/annotations/valid_annot_folder/",
-        "cache_name":           "raccoon_val.pkl",
+        "valid_image_folder":   "./Thesis_Datasets/images/val_images_folder/",
+        "valid_annot_folder":   "./Thesis_Datasets/annotations/valid_annot_folder/",
+        "cache_name":           "ORM_DET_cal_V7.pkl",
 
-        "valid_times":          1
+        "valid_times":          2
     }
 }

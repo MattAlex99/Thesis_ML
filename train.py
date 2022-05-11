@@ -68,7 +68,7 @@ def create_training_instances(
         labels = train_labels.keys()
 
     max_box_per_image = max([len(inst['object']) for inst in (train_ints + valid_ints)])
-
+    print("max_box_per_image is",max_box_per_image)
     return train_ints, valid_ints, sorted(labels), max_box_per_image
 
 def create_callbacks(saved_weights_name, tensorboard_logs, model_to_save,csv_logger):
